@@ -1,8 +1,7 @@
 //app.js
 
 //es5 import express from 'express'
-import pkg from 'express';
-const { express } = pkg;
+import express from 'express'
 
 //
 //const express = require('express');
