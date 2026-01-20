@@ -1,18 +1,14 @@
-//app.js
+import express from 'express';
 
-//es5 import express from 'express'
-import { express } from 'express';
-//
-//const express = require('express');
+const app = express();
 
-const app = express()
+// Render provides the port dynamically
+const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-  res.send('Hello World!!! TESTING FROM THE DEV')
-})
+  res.send('Hello World!!!');
+});
 
-
-//server start
-app.listen(3000, () => {
-  console.log('Server is running on http://localhost:3000')
-})
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
