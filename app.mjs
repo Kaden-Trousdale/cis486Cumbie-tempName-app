@@ -54,9 +54,6 @@ app.post('/api/body', (req, res) => {
 
 
 //start the server. 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Running on port ${PORT}`);
-});
-
+app.listen(3000, () => {
+  console.log('Server is running on http://localhost:3000')
+})
