@@ -1,82 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>devOps</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevOps API Test</title>
 </head>
 
 <body>
-  <h1>welcome to my devOps pages. </h1>
-  <p>{{myVar}}</p>
-  <a href="/api/json">json</a>
+  <h1>Welcome to my DevOps page</h1>
+
+  <p id="apiMessage">Loading API message...</p>
+
+  <hr />
 
   <div>
     <h3>Query Parameter</h3>
-    <input id="queryName" type="text" placeholder="Enter name">
+    <input id="queryName" type="text" placeholder="Enter name" />
     <button onclick="sendQuery()">Send Query</button>
     <div id="queryResult"></div>
   </div>
 
+  <hr />
+
   <div>
     <h3>URL Parameter</h3>
-    <input id="urlId" type="text" placeholder="Enter id">
+    <input id="urlId" type="text" placeholder="Enter id" />
     <button onclick="sendUrl()">Send URL Param</button>
     <div id="urlResult"></div>
   </div>
 
+  <hr />
 
   <div>
     <h3>POST Body</h3>
-    <input id="bodyName" type="text" placeholder="Enter name">
+    <input id="bodyName" type="text" placeholder="Enter name" />
     <button onclick="sendBody()">Send POST Body</button>
     <div id="bodyResult"></div>
   </div>
 
   <script>
+    // GET /api/json
     fetch('/api/json')
-      .then(response => response.json())
+      .then(res => res.json())
       .then(data => {
-        document.body.innerHTML += `<p>API says: ${data.myVar}</p>`;
+        document.getElementById('apiMessage').textContent =
+          `API says: ${data.myVar}`;
       })
-      .catch(err => {
-        document.body.innerHTML += `<p>Error fetching API</p>`;
+      .catch(() => {
+        document.getElementById('apiMessage').textContent =
+          'Error fetching API';
       });
 
-    
+    // GET with query parameter
     function sendQuery() {
       const name = document.getElementById('queryName').value;
       fetch(`/api/query?name=${encodeURIComponent(name)}`)
         .then(res => res.json())
         .then(data => {
-          document.getElementById('queryResult').textContent = data.message;
+          document.getElementById('queryResult').textContent =
+            data.message || '(no value)';
         });
     }
 
+    // GET with URL parameter
     function sendUrl() {
       const id = document.getElementById('urlId').value;
       fetch(`/api/url/${encodeURIComponent(id)}`)
         .then(res => res.json())
         .then(data => {
-          document.getElementById('urlResult').textContent = data.message;
+          document.getElementById('urlResult').textContent =
+            data.message;
         });
     }
 
+    // POST with JSON body
     function sendBody() {
       const name = document.getElementById('bodyName').value;
       fetch('/api/body', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ name })
       })
         .then(res => res.json())
         .then(data => {
-          document.getElementById('bodyResult').textContent = data.message;
+          document.getElementById('bodyResult').textContent =
+            data.message;
         });
     }
   </script>
-
 </body>
-
 </html>
