@@ -11,7 +11,10 @@ import { MongoClient , ServerApiVersion} from 'mongodb';
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+//MONGO DB CONNECTION STRING
 const uri = process.env.MONGO_URI;  
+
 const myVar = 'injected from server'; // Declare your variable
 
 app.use(express.static(join(__dirname, 'public')));
