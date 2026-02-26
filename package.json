@@ -4,8 +4,9 @@
   "description": "spring2026",
   "type": "module",
   "main": "app.mjs",
-  "scripts": {
-    "start": "node app.mjs"
+"scripts": {
+    "start": "node app.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
