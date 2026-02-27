@@ -37,6 +37,7 @@ jobs:
 
             cd "$APP_DIR"
 
+            git checkout HEAD -- package-lock.json
             git pull
             sudo npm ci
 
