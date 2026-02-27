@@ -4,7 +4,7 @@
   "description": "spring2026",
   "type": "module",
   "main": "app.mjs",
-"scripts": {
+  "scripts": {
     "start": "node app.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,9 +20,9 @@
   },
   "homepage": "https://github.com/Kaden-Trousdale/cis486Cumbie-tempName-app#readme",
   "dependencies": {
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
-    "mongodb": "^7.0.0",
+    "mongodb": "^7.1.0",
     "nodemon": "^3.1.14"
   }
 }

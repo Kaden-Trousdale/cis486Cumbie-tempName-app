@@ -1,273 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CIS 486 - Attendance Tracker</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #f5f5f5;
-    }
-    .container {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    h1, h2 {
-      color: #333;
-    }
-    .class-info {
-      background: #e8f4fd;
-      border-left: 4px solid #2196F3;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    input {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 16px;
-    }
-    button {
-      background: #2196F3;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-      margin-right: 10px;
-    }
-    button:hover {
-      background: #1976D2;
-    }
-    .delete-btn {
-      background: #f44336;
-    }
-    .delete-btn:hover {
-      background: #d32f2f;
-    }
-    .edit-btn {
-      background: #ff9800;
-    }
-    .edit-btn:hover {
-      background: #f57c00;
-    }
-    .message {
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 4px;
-    }
-    .success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-    .error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-    .record {
-      background: #f8f9fa;
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 4px;
-      border: 1px solid #dee2e6;
-    }
-    #attendanceList {
-      max-height: 400px;
-      overflow-y: auto;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Seal Chef's Questionable Recipes</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles/charlie-style.css"/>
 </head>
 <body>
-  <!-- Class Information Section -->
-  <div class="container class-info">
-    <h1>Class Information</h1>
-    <div id="classInfo">Loading class information...</div>
-  </div>
 
-  <!-- Attendance Form -->
-  <div class="container">
-    <h2>Student Attendance</h2>
-    <div id="message"></div>
-    
-    <form id="attendanceForm">
-      <div class="form-group">
-        <label for="studentName">Student Name:</label>
-        <input type="text" id="studentName" required>
+  <!-- Navbar -->
+  <nav class="navbar navbar-dark bg-dark fixed-top">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <a class="navbar-brand d-flex align-items-center" href="/">
+        <img src="https://png.pngtree.com/png-clipart/20240329/original/pngtree-chef-seal-vector-png-image_14711663.png" alt="Seal" width="100" height="80" class="me-2">
+        Seal Chef's Questionable Recipes
+      </a>
+      <div class="d-flex align-items-center">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
       </div>
-      
-      <div class="form-group">
-        <label for="date">Today's Date:</label>
-        <input type="text" id="date" required placeholder="February 3, 2026">
-      </div>
-      
-      <div class="form-group">
-        <label for="keyword">Keyword from Board:</label>
-        <input type="text" id="keyword" required>
-      </div>
-      
-      <button type="submit">Record Attendance</button>
-      <button type="button" onclick="loadAttendance()">Refresh List</button>
-    </form>
-  </div>
+    </div>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav text-end pe-3">
+        <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/api/health" target="_blank">API Health</a></li>
+      </ul>
+    </div>
+  </nav>
 
-  <!-- Attendance Records -->
-  <div class="container">
-    <h2>Attendance Records</h2>
-    <div id="attendanceList">Loading attendance records...</div>
-  </div>
-
-  <script>
-    let editingId = null;
-
-    // Load class information on page load
-    async function loadClassInfo() {
-      try {
-        const response = await fetch('/api/class');
-        const classData = await response.json();
-        
-        document.getElementById('classInfo').innerHTML = `
-          <h3>${classData.courseNumber} - ${classData.courseName}</h3>
-          <p><strong>Nickname:</strong> ${classData.nickname}</p>
-          <p><strong>Semester:</strong> ${classData.semester}</p>
-          <p><strong>Calendar:</strong> ${classData.calendar}</p>
-        `;
-      } catch (error) {
-        document.getElementById('classInfo').innerHTML = 'Error loading class information';
-      }
-    }
-
-    // Handle form submission
-    document.getElementById('attendanceForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const studentName = document.getElementById('studentName').value;
-      const date = document.getElementById('date').value;
-      const keyword = document.getElementById('keyword').value;
-
-      try {
-        const url = editingId ? `/api/attendance/${editingId}` : '/api/attendance';
-        const method = editingId ? 'PUT' : 'POST';
-        
-        const response = await fetch(url, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            studentName,
-            date,
-            keyword
-          })
-        });
-
-        const result = await response.json();
-        
-        if (response.ok) {
-          showMessage(result.message, 'success');
-          document.getElementById('attendanceForm').reset();
-          if (editingId) {
-            editingId = null;
-            document.querySelector('button[type="submit"]').textContent = 'Record Attendance';
-          }
-          loadAttendance();
-        } else {
-          showMessage(result.error, 'error');
-        }
-      } catch (error) {
-        showMessage('Error submitting form', 'error');
-      }
-    });
-
-    // Load attendance records
-    async function loadAttendance() {
-      try {
-        const response = await fetch('/api/attendance');
-        const records = await response.json();
-        
-        const listDiv = document.getElementById('attendanceList');
-        
-        if (records.length === 0) {
-          listDiv.innerHTML = '<p>No attendance records yet.</p>';
-          return;
-        }
-
-        listDiv.innerHTML = records.map(record => `
-          <div class="record">
-            <strong>${record.studentName}</strong> - ${record.date}<br>
-            <small>Keyword: ${record.keyword} | Recorded: ${new Date(record.timestamp).toLocaleString()}</small><br>
-            <button class="edit-btn" onclick="editRecord('${record._id}', '${record.studentName}', '${record.date}', '${record.keyword}')">Edit</button>
-            <button class="delete-btn" onclick="deleteRecord('${record._id}')">Delete</button>
+  <!-- Edit Recipe Modal -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editModalLabel">Edit Recipe</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editId">
+          <div class="mb-3">
+            <label for="editTitle" class="form-label">Recipe Title</label>
+            <input type="text" class="form-control" id="editTitle" required>
           </div>
-        `).join('');
-      } catch (error) {
-        document.getElementById('attendanceList').innerHTML = 'Error loading attendance records';
-      }
-    }
+          <div class="mb-3">
+            <label for="editIngredients" class="form-label">Ingredients</label>
+            <input type="text" class="form-control" id="editIngredients" required>
+          </div>
+          <div class="mb-3">
+            <label for="editInstructions" class="form-label">Instructions</label>
+            <textarea class="form-control" id="editInstructions" rows="3" required></textarea>
+          </div>
+          <button type="button" class="btn btn-warning" id="saveEditBtn">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    // Edit record
-    function editRecord(id, studentName, date, keyword) {
-      editingId = id;
-      document.getElementById('studentName').value = studentName;
-      document.getElementById('date').value = date;
-      document.getElementById('keyword').value = keyword;
-      document.querySelector('button[type="submit"]').textContent = 'Update Attendance';
-      showMessage('Editing record - click Update to save changes', 'success');
-    }
+  <!-- Main Content -->
+  <div class="container my-4 pt-5" id="content-body">
+    <header>
+      <h1><strong>Possibly Edible Recipes</strong></h1>
+      <p>Have you ever wanted to cook something that you had to be scared to eat? Well you found the right place! Any aspiring chef, criminal, culinary student, or aquatic animal can create and post their own fun and tasty dish.</p>
+      <p><strong>DISCLAIMER: </strong>For legal reasons, do not eat any of these food items!</p>
+    </header>
+    <br><br>
 
-    // Delete record
-    async function deleteRecord(id) {
-      if (!confirm('Are you sure you want to delete this record?')) return;
-      
-      try {
-        const response = await fetch(`/api/attendance/${id}`, {
-          method: 'DELETE'
-        });
+    <!-- Add Recipe Form -->
+    <h3>Enter your recipe here!</h3>
+    <form id="dataForm">
+      <div class="mb-2">
+        <label for="entryTitle" class="form-label">Recipe Title</label>
+        <input type="text" id="entryTitle" class="form-control" placeholder="Title" required>
+      </div>
+      <div class="mb-2">
+        <label for="entryIngredients" class="form-label">Ingredients</label>
+        <input type="text" id="entryIngredients" class="form-control" placeholder="Ingredients" required>
+      </div>
+      <div class="mb-2">
+        <label for="entryInstructions" class="form-label">Instructions</label>
+        <textarea id="entryInstructions" class="form-control" placeholder="Instructions" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Add Recipe!</button>
+      <button type="button" id="loadSample" class="btn btn-secondary">Load Example!</button>
+    </form>
 
-        const result = await response.json();
-        
-        if (response.ok) {
-          showMessage(result.message, 'success');
-          loadAttendance();
-        } else {
-          showMessage(result.error, 'error');
-        }
-      } catch (error) {
-        showMessage('Error deleting record', 'error');
-      }
-    }
+    <!-- Status message -->
+    <div id="statusMsg" class="mt-2"></div>
 
-    // Show message
-    function showMessage(text, type) {
-      const messageDiv = document.getElementById('message');
-      messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
-      setTimeout(() => {
-        messageDiv.innerHTML = '';
-      }, 3000);
-    }
+    <br>
+    <h1>Recipes</h1>
+    <br>
 
-    // Initialize page
-    loadClassInfo();
-    loadAttendance();
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="text-center py-3" style="display:none;">
+      <div class="spinner-border text-secondary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
 
-    // Set today's date as default
-    document.getElementById('date').value = 'February 3, 2026';
-  </script>
+    <div id="data-container" class="mb-4"></div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="d-flex flex-wrap text-light justify-content-center bg-dark mt-5 pt-3">
+    <section class="w-100">
+      <div class="row mt-3 p-3">
+        <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
+          <h6 class="text-uppercase fw-bold mb-4">Seal Chef's Questionable Recipes</h6>
+          <p>Here you can find the source code, wireframe, Wave, and NU validator for this site.</p>
+        </div>
+        <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
+          <h6 class="text-uppercase fw-bold mb-4">Fun Code Information!</h6>
+          <p><a href="https://validator.nu/" target="_blank" class="text-reset">Nu Validator</a></p>
+          <p><a href="https://wave.webaim.org/" target="_blank" class="text-reset">Wave</a></p>
+          <p><a href="/api/health" class="text-reset" target="_blank">API Health</a></p>
+        </div>
+        <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
+          <h6 class="text-uppercase fw-bold mb-4">Creator links</h6>
+          <p><a href="https://github.com/Kaden-Trousdale" class="text-reset" target="_blank">Kaden Trousdale</a></p>
+        </div>
+      </div>
+      <div class="text-center p-3">&copy; 2025 GitHub, Inc</div>
+    </section>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="scripts/script.js"></script>
 </body>
 </html>
