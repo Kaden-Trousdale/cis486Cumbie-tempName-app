@@ -1,82 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>devOps</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Seal Chef's Questionable Recipes</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles/charlie-style.css"/>
 </head>
-
 <body>
-  <h1>welcome to my devOps pages. </h1>
-  <p>{{myVar}}</p>
-  <a href="/api/json">json</a>
 
-  <div>
-    <h3>Query Parameter</h3>
-    <input id="queryName" type="text" placeholder="Enter name">
-    <button onclick="sendQuery()">Send Query</button>
-    <div id="queryResult"></div>
+  <!-- Navbar -->
+  <nav class="navbar navbar-dark bg-dark fixed-top">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <a class="navbar-brand d-flex align-items-center" href="/">
+        <img src="https://png.pngtree.com/png-clipart/20240329/original/pngtree-chef-seal-vector-png-image_14711663.png" alt="Seal" width="100" height="80" class="me-2">
+        Seal Chef's Questionable Recipes
+      </a>
+      <div class="d-flex align-items-center">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+    </div>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav text-end pe-3">
+        <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/api/health" target="_blank">API Health</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Edit Recipe Modal -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editModalLabel">Edit Recipe</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editId">
+          <div class="mb-3">
+            <label for="editTitle" class="form-label">Recipe Title</label>
+            <input type="text" class="form-control" id="editTitle" required>
+          </div>
+          <div class="mb-3">
+            <label for="editIngredients" class="form-label">Ingredients</label>
+            <input type="text" class="form-control" id="editIngredients" required>
+          </div>
+          <div class="mb-3">
+            <label for="editInstructions" class="form-label">Instructions</label>
+            <textarea class="form-control" id="editInstructions" rows="3" required></textarea>
+          </div>
+          <button type="button" class="btn btn-warning" id="saveEditBtn">Save Changes</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div>
-    <h3>URL Parameter</h3>
-    <input id="urlId" type="text" placeholder="Enter id">
-    <button onclick="sendUrl()">Send URL Param</button>
-    <div id="urlResult"></div>
+  <!-- Main Content -->
+  <div class="container my-4 pt-5" id="content-body">
+    <header>
+      <h1><strong>Possibly Edible Recipes</strong></h1>
+      <p>Have you ever wanted to cook something that you had to be scared to eat? Well you found the right place! Any aspiring chef, criminal, culinary student, or aquatic animal can create and post their own fun and tasty dish.</p>
+      <p><strong>DISCLAIMER: </strong>For legal reasons, do not eat any of these food items!</p>
+    </header>
+    <br><br>
+
+    <!-- Add Recipe Form -->
+    <h3>Enter your recipe here!</h3>
+    <form id="dataForm">
+      <div class="mb-2">
+        <label for="entryTitle" class="form-label">Recipe Title</label>
+        <input type="text" id="entryTitle" class="form-control" placeholder="Title" required>
+      </div>
+      <div class="mb-2">
+        <label for="entryIngredients" class="form-label">Ingredients</label>
+        <input type="text" id="entryIngredients" class="form-control" placeholder="Ingredients" required>
+      </div>
+      <div class="mb-2">
+        <label for="entryInstructions" class="form-label">Instructions</label>
+        <textarea id="entryInstructions" class="form-control" placeholder="Instructions" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Add Recipe!</button>
+      <button type="button" id="loadSample" class="btn btn-secondary">Load Example!</button>
+    </form>
+
+    <!-- Status message -->
+    <div id="statusMsg" class="mt-2"></div>
+
+    <br>
+    <h1>Recipes</h1>
+    <br>
+
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="text-center py-3" style="display:none;">
+      <div class="spinner-border text-secondary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <div id="data-container" class="mb-4"></div>
   </div>
 
+  <!-- Footer -->
+  <footer class="d-flex flex-wrap text-light justify-content-center bg-dark mt-5 pt-3">
+    <section class="w-100">
+      <div class="row mt-3 p-3">
+        <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
+          <h6 class="text-uppercase fw-bold mb-4">Seal Chef's Questionable Recipes</h6>
+          <p>Here you can find the source code, wireframe, Wave, and NU validator for this site.</p>
+        </div>
+        <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
+          <h6 class="text-uppercase fw-bold mb-4">Fun Code Information!</h6>
+          <p><a href="https://validator.nu/" target="_blank" class="text-reset">Nu Validator</a></p>
+          <p><a href="https://wave.webaim.org/" target="_blank" class="text-reset">Wave</a></p>
+          <p><a href="/api/health" class="text-reset" target="_blank">API Health</a></p>
+        </div>
+        <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
+          <h6 class="text-uppercase fw-bold mb-4">Creator links</h6>
+          <p><a href="https://github.com/Kaden-Trousdale" class="text-reset" target="_blank">Kaden Trousdale</a></p>
+        </div>
+      </div>
+      <div class="text-center p-3">&copy; 2025 GitHub, Inc</div>
+    </section>
+  </footer>
 
-  <div>
-    <h3>POST Body</h3>
-    <input id="bodyName" type="text" placeholder="Enter name">
-    <button onclick="sendBody()">Send POST Body</button>
-    <div id="bodyResult"></div>
-  </div>
-
-  <script>
-    fetch('/api/json')
-      .then(response => response.json())
-      .then(data => {
-        document.body.innerHTML += `<p>API says: ${data.myVar}</p>`;
-      })
-      .catch(err => {
-        document.body.innerHTML += `<p>Error fetching API</p>`;
-      });
-
-    
-    function sendQuery() {
-      const name = document.getElementById('queryName').value;
-      fetch(`/api/query?name=${encodeURIComponent(name)}`)
-        .then(res => res.json())
-        .then(data => {
-          document.getElementById('queryResult').textContent = data.message;
-        });
-    }
-
-    function sendUrl() {
-      const id = document.getElementById('urlId').value;
-      fetch(`/api/url/${encodeURIComponent(id)}`)
-        .then(res => res.json())
-        .then(data => {
-          document.getElementById('urlResult').textContent = data.message;
-        });
-    }
-
-    function sendBody() {
-      const name = document.getElementById('bodyName').value;
-      fetch('/api/body', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name })
-      })
-        .then(res => res.json())
-        .then(data => {
-          document.getElementById('bodyResult').textContent = data.message;
-        });
-    }
-  </script>
-
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="scripts/script.js"></script>
 </body>
-
 </html>

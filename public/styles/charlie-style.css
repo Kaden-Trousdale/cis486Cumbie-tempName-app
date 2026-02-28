@@ -1,0 +1,147 @@
+/* Seal Chef's Questionable Recipes CSS */
+
+/* Card styling */
+.card {
+  transition: all 0.2s ease-in-out;
+  border-radius: 8px;
+}
+
+.card:hover {
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Comments styling */
+.comments-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 2px solid #ddd;
+}
+
+.comment {
+  background-color: #f8f9fa;
+  border-left: 4px solid #007bff;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-radius: 4px;
+}
+
+.comment-text {
+  margin: 0.5rem 0;
+  font-style: italic;
+}
+
+.comment-author {
+  font-weight: bold;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.comment-actions {
+  margin-top: 0.5rem;
+}
+
+.comment-actions .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.add-comment-form {
+  margin-top: 1rem;
+}
+
+/* Header styling */
+header {
+  font-family: "Comic Neue", serif;
+  padding: 25px;
+  text-align: center;
+  color: Black;
+  font-size: 25px;
+  margin-bottom: 20px;
+}
+
+/* Body and content styling */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  backdrop-filter: blur(6px);
+  background: #ccc url('https://media3.giphy.com/media/XIixg3mYzPy7n1YgSJ/giphy.gif') repeat center center fixed;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+footer {
+  margin-top: auto;
+}
+
+#list {
+  font-family: "Comic Neue", serif;
+  border: solid 5px black;
+  font-size: 20px;
+  background-color: white;
+}
+
+#content-body {
+  font-family: "Comic Neue", serif;
+  border: solid 5px black;
+  font-size: 20px;
+  background-color: rgba(231, 222, 222, 0.897);
+  flex-grow: 1;
+}
+
+/* Form styling */
+#dataForm {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.btn {
+  cursor: pointer;
+}
+
+.btn-small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* Status messages */
+#statusMsg {
+  z-index: 1050;
+  position: sticky;
+  top: 100px;
+}
+
+/* Loading indicator */
+#loadingIndicator {
+  padding: 2rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  header {
+    font-size: 18px;
+    padding: 15px;
+  }
+
+  #content-body {
+    font-size: 16px;
+    border: solid 3px black;
+  }
+
+  #list {
+    font-size: 16px;
+    border: solid 3px black;
+  }
+}
