@@ -41,29 +41,36 @@ function renderData(recipes) {
   }
 
   recipes.forEach(entry => {
+    const imageHtml = entry.image ? `<div class="col-md-4"><img src="${entry.image}" class="img-fluid rounded" alt="Recipe image" style="object-fit: cover; height: 100%; min-height: 200px; width: 100%;"></div>` : '';
+    const colClass = entry.image ? 'col-md-8' : 'col-12';
     const recipeCard = $(`
       <div class="card mb-3" id="list" data-id="${entry._id}">
-        <div class="card-body">
-          <h4 class="card-title">${escapeHtml(entry.title)}</h4>
-          <p><strong>Ingredients:</strong> ${escapeHtml(entry.ingredients)}</p>
-          <p><strong>Instructions:</strong> ${escapeHtml(entry.instructions)}</p>
-          <div class="d-flex gap-2 align-items-center">
-            <button class="btn btn-sm btn-warning editBtn">Edit</button>
-            <button class="btn btn-sm btn-danger deleteBtn">Delete</button>
-            <button class="btn btn-sm btn-info toggleCommentsBtn">View Comments</button>
-            <button class="btn btn-sm btn-success likeBtn"><span class="heart">♥</span> <span class="likeCount">${entry.likes || 0}</span></button>
-          </div>
-          
-          <!-- Comments Section -->
-          <div class="comments-section" style="display:none;">
-            <h6 class="mt-3">Comments:</h6>
-            <div class="comments-list"></div>
-            
-            <!-- Add Comment Form -->
-            <div class="add-comment-form">
-              <input type="text" class="form-control mb-2 commentAuthor" placeholder="Your name">
-              <textarea class="form-control mb-2 commentText" placeholder="Add a comment..." rows="2"></textarea>
-              <button type="button" class="btn btn-sm btn-success addCommentBtn">Post Comment</button>
+        <div class="row g-0">
+          ${imageHtml}
+          <div class="${colClass}">
+            <div class="card-body">
+              <h4 class="card-title">${escapeHtml(entry.title)}</h4>
+              <p><strong>Ingredients:</strong> ${escapeHtml(entry.ingredients)}</p>
+              <p><strong>Instructions:</strong> ${escapeHtml(entry.instructions)}</p>
+              <div class="d-flex gap-2 align-items-center">
+                <button class="btn btn-sm btn-warning editBtn">Edit</button>
+                <button class="btn btn-sm btn-danger deleteBtn">Delete</button>
+                <button class="btn btn-sm btn-info toggleCommentsBtn">View Comments</button>
+                <button class="btn btn-sm btn-success likeBtn"><span class="heart">♥</span> <span class="likeCount">${entry.likes || 0}</span></button>
+              </div>
+              
+              <!-- Comments Section -->
+              <div class="comments-section" style="display:none;">
+                <h6 class="mt-3">Comments:</h6>
+                <div class="comments-list"></div>
+                
+                <!-- Add Comment Form -->
+                <div class="add-comment-form">
+                  <input type="text" class="form-control mb-2 commentAuthor" placeholder="Your name">
+                  <textarea class="form-control mb-2 commentText" placeholder="Add a comment..." rows="2"></textarea>
+                  <button type="button" class="btn btn-sm btn-success addCommentBtn">Post Comment</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -125,30 +132,54 @@ function loadComments(recipeId, container) {
 $('#dataForm').on('submit', function (e) {
   e.preventDefault();
   const form = this;
-  const recipe = {
-    title: $('#entryTitle').val().trim(),
-    ingredients: $('#entryIngredients').val().trim(),
-    instructions: $('#entryInstructions').val().trim(),
-  };
+  const imageInput = document.getElementById('entryImage');
+  const file = imageInput.files[0];
 
-  console.log('Submitting recipe:', recipe);
+  // Handle image conversion to base64
+  function submitRecipe(imageData = null) {
+    const recipe = {
+      title: $('#entryTitle').val().trim(),
+      ingredients: $('#entryIngredients').val().trim(),
+      instructions: $('#entryInstructions').val().trim(),
+    };
 
-  $.ajax({
-    url: '/api/recipes',
-    method: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify(recipe),
-  })
-    .done((res) => {
-      console.log('POST success:', res);
-      showStatus('Recipe added!');
-      form.reset();
-      loadRecipes();
+    if (imageData) {
+      recipe.image = imageData;
+    }
+
+    console.log('Submitting recipe:', recipe);
+
+    $.ajax({
+      url: '/api/recipes',
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(recipe),
     })
-    .fail((xhr) => {
-      console.error('POST failed:', xhr.status, xhr.responseText);
-      showStatus(`Failed to add recipe: ${xhr.responseJSON?.error || xhr.statusText}`, 'danger');
-    });
+      .done((res) => {
+        console.log('POST success:', res);
+        showStatus('Recipe added!');
+        form.reset();
+        loadRecipes();
+      })
+      .fail((xhr) => {
+        console.error('POST failed:', xhr.status, xhr.responseText);
+        showStatus(`Failed to add recipe: ${xhr.responseJSON?.error || xhr.statusText}`, 'danger');
+      });
+  }
+
+  // If there's an image, convert to base64; otherwise submit without image
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      submitRecipe(event.target.result);
+    };
+    reader.onerror = () => {
+      showStatus('Failed to read image file.', 'danger');
+    };
+    reader.readAsDataURL(file);
+  } else {
+    submitRecipe();
+  }
 });
 
 // ─── DELETE - Remove recipe ───────────────────────────────────────────────────
