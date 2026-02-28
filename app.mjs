@@ -18,7 +18,8 @@ const myVar = 'injected from server'; // Declare your variable
 
 
 app.use(express.static(join(__dirname, 'public')));
-app.use(express.json()); 
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb' }));
 
 
 
@@ -252,7 +253,7 @@ app.get('/api/recipes', async (req, res) => {
 // CREATE - Add new recipe
 app.post('/api/recipes', async (req, res) => {
   try {
-    const { title, ingredients, instructions } = req.body;
+    const { title, ingredients, instructions, image } = req.body;
     
     if (!title || !ingredients || !instructions) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -268,6 +269,11 @@ app.post('/api/recipes', async (req, res) => {
       likes: 0,
       createdAt: new Date()
     };
+
+    // Add image if provided
+    if (image) {
+      recipe.image = image;
+    }
     
     const result = await collection.insertOne(recipe);
     res.json({ message: 'Recipe added!', id: result.insertedId });
