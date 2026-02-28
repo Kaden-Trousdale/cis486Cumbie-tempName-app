@@ -65,8 +65,6 @@ This is a complete CRUD (Create, Read, Update, Delete) application demonstrating
 - `POST /api/recipes/:id/comments` - Add comment
 - `DELETE /api/recipes/:id/comments/:commentId` - Delete comment
 
-### Utilities
-- `GET /api/health` - API health check and endpoint documentation
 
 ## 🏗️ Project Structure
 
