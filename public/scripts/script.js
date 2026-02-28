@@ -1,3 +1,32 @@
+/**
+ * 🍽️  Seal Chef's Questionable Recipes - Frontend Application Logic
+ * 
+ * Author: Kaden Trousdale
+ * Course: CIS 486 - Full Stack DevOps
+ * Assignment: Dev Lab QUEBEC
+ * 
+ * Description:
+ * Frontend logic for the recipe management SPA. Handles all client-side
+ * operations including:
+ * - Fetching recipes from MongoDB via REST API
+ * - Creating new recipes with base64 image encoding
+ * - Updating and deleting recipes
+ * - Managing likes and comments
+ * - Real-time DOM updates
+ * - Error handling and user feedback
+ * 
+ * Stack:
+ * - DOM Manipulation: jQuery
+ * - HTTP Requests: jQuery AJAX
+ * - UI Framework: Bootstrap 5
+ * - API Endpoints: RESTful Express.js API
+ * 
+ * Dependencies:
+ * - jQuery 3.7.1 (CDN)
+ * - Bootstrap 5.3.2 (CDN)
+ * - Backend: Node.js Express.js Server
+ */
+
 // script.js - Seal Chef's Questionable Recipes
 // Full CRUD operations for recipes and comments
 
@@ -35,7 +64,7 @@ function renderData(recipes) {
   const container = $('#data-container');
   container.empty();
 
-  if (!recipes.length) {
+  if (!recipes || !Array.isArray(recipes) || recipes.length === 0) {
     container.append('<p class="text-muted">No recipes yet — add one above!</p>');
     return;
   }
@@ -52,7 +81,7 @@ function renderData(recipes) {
               <h4 class="card-title">${escapeHtml(entry.title)}</h4>
               <p><strong>Ingredients:</strong> ${escapeHtml(entry.ingredients)}</p>
               <p><strong>Instructions:</strong> ${escapeHtml(entry.instructions)}</p>
-              <div class="d-flex gap-2 align-items-center">
+              <div class="d-flex gap-2 align-items-center flex-wrap">
                 <button class="btn btn-sm btn-warning editBtn">Edit</button>
                 <button class="btn btn-sm btn-danger deleteBtn">Delete</button>
                 <button class="btn btn-sm btn-info toggleCommentsBtn">View Comments</button>
@@ -127,15 +156,15 @@ function loadComments(recipeId, container) {
     });
 }
 
-// ─── CREATE - POST new recipe ─────────────────────────────────────────────────
+// ─── CREATE - POST new recipe with optional image ────────────────────────────
 // When the form is submitted, this function gathers the input values, sends a POST request to create a new recipe, and then reloads the recipes to show the new entry. It also includes error handling to display a message if the request fails.
 $('#dataForm').on('submit', function (e) {
   e.preventDefault();
   const form = this;
   const imageInput = document.getElementById('entryImage');
-  const file = imageInput.files[0];
+  const file = imageInput?.files[0];
 
-  // Handle image conversion to base64
+  // Function to submit recipe (with or without image)
   function submitRecipe(imageData = null) {
     const recipe = {
       title: $('#entryTitle').val().trim(),
@@ -147,8 +176,6 @@ $('#dataForm').on('submit', function (e) {
       recipe.image = imageData;
     }
 
-    console.log('Submitting recipe:', recipe);
-
     $.ajax({
       url: '/api/recipes',
       method: 'POST',
@@ -156,7 +183,6 @@ $('#dataForm').on('submit', function (e) {
       data: JSON.stringify(recipe),
     })
       .done((res) => {
-        console.log('POST success:', res);
         showStatus('Recipe added!');
         form.reset();
         loadRecipes();
@@ -214,6 +240,7 @@ $('#data-container').on('click', '.likeBtn', function () {
     })
     .fail(() => showStatus('Failed to like recipe.', 'danger'));
 });
+
 
 // ─── EDIT - Open modal with current values ────────────────────────────────────
 // When the "Edit" button is clicked, this function retrieves the current recipe details from the card, populates the edit form in a modal with those details, and then shows the modal to the user. This allows the user to see the existing values and make changes before saving.
@@ -324,9 +351,6 @@ $('#data-container').on('click', '.deleteCommentBtn', function () {
     })
     .fail(() => showStatus('Failed to delete comment.', 'danger'));
 });
-
-
-
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 $(document).ready(() => loadRecipes());

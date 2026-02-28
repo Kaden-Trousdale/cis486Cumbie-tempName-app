@@ -1,19 +1,28 @@
 {
   "name": "cis486cumbie-tempname-app",
   "version": "1.0.0",
-  "description": "spring2026",
+  "description": "Seal Chef's Questionable Recipes - Full Stack MVC CRUD Application with Image Upload, Likes, and Comments",
   "type": "module",
   "main": "app.mjs",
   "scripts": {
     "start": "node app.mjs",
+    "dev": "nodemon app.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Kaden-Trousdale/cis486Cumbie-tempName-app.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "crud",
+    "express",
+    "mongodb",
+    "fullstack",
+    "mvc",
+    "restful-api",
+    "recipes"
+  ],
+  "author": "Kaden Trousdale",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Kaden-Trousdale/cis486Cumbie-tempName-app/issues"

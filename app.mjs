@@ -1,3 +1,31 @@
+//━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🍽️  Seal Chef's Questionable Recipes - Full Stack MVC CRUD Application
+//━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 
+// Author: Kaden Trousdale
+// Course: CIS 486 - Full Stack DevOps
+// Assignment: Dev Lab QUEBEC - Full Stack MVC Deployment & Data Round Trip
+// 
+// Description:
+// A web-based model-view-controller (MVC) single-page application (SPA) that
+// demonstrates a complete full-stack data round trip. Users can create, view,
+// update, and delete recipes with optional images, rate recipes, and leave comments.
+// All data persists to MongoDB using RESTful API endpoints.
+//
+// Technology Stack:
+// - Runtime: Node.js with ES6 modules (.mjs)
+// - Framework: Express.js (v5.2.1)
+// - Database: MongoDB Atlas (cloud-hosted)
+// - Frontend: HTML5, CSS3, Bootstrap 5, jQuery, normalize.css
+// - DevOps: GitHub Actions, Render, Google Cloud Platform (GCP)
+// - Development Tools: nodemon, dotenv
+//
+// Deployments:
+// - Development: https://cis486cumbie-tempname-app.onrender.com/
+// - Production: https://possiblyediblefoods.barrycumbie.com/
+//
+//━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 //app.mjs
 //we are in ES6, use this. 
 import 'dotenv/config'; 
@@ -267,6 +295,7 @@ app.post('/api/recipes', async (req, res) => {
       ingredients,
       instructions,
       likes: 0,
+      comments: [],
       createdAt: new Date()
     };
 
@@ -276,7 +305,7 @@ app.post('/api/recipes', async (req, res) => {
     }
     
     const result = await collection.insertOne(recipe);
-    res.json({ message: 'Recipe added!', id: result.insertedId });
+    res.status(201).json({ message: 'Recipe added!', id: result.insertedId });
   } catch (error) {
     console.error('Error creating recipe:', error);
     res.status(500).json({ error: 'Failed to add recipe' });
@@ -288,6 +317,10 @@ app.put('/api/recipes/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { title, ingredients, instructions } = req.body;
+    
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid recipe ID' });
+    }
     
     const db = client.db('cis486');
     const collection = db.collection('recipes');
@@ -301,7 +334,7 @@ app.put('/api/recipes/:id', async (req, res) => {
       return res.status(404).json({ error: 'Recipe not found' });
     }
     
-    res.json({ message: 'Recipe updated!' });
+    res.status(200).json({ message: 'Recipe updated!' });
   } catch (error) {
     console.error('Error updating recipe:', error);
     res.status(500).json({ error: 'Failed to update recipe' });
@@ -313,6 +346,10 @@ app.delete('/api/recipes/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid recipe ID' });
+    }
+    
     const db = client.db('cis486');
     const collection = db.collection('recipes');
     
@@ -322,7 +359,7 @@ app.delete('/api/recipes/:id', async (req, res) => {
       return res.status(404).json({ error: 'Recipe not found' });
     }
     
-    res.json({ message: 'Recipe deleted!' });
+    res.status(200).json({ message: 'Recipe deleted!' });
   } catch (error) {
     console.error('Error deleting recipe:', error);
     res.status(500).json({ error: 'Failed to delete recipe' });
@@ -333,6 +370,10 @@ app.delete('/api/recipes/:id', async (req, res) => {
 app.post('/api/recipes/:id/like', async (req, res) => {
   try {
     const { id } = req.params;
+    
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid recipe ID' });
+    }
     
     const db = client.db('cis486');
     const collection = db.collection('recipes');
@@ -362,6 +403,10 @@ app.get('/api/recipes/:id/comments', async (req, res) => {
   try {
     const { id } = req.params;
     
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid recipe ID' });
+    }
+    
     const db = client.db('cis486');
     const collection = db.collection('recipes');
     
@@ -383,6 +428,10 @@ app.post('/api/recipes/:id/comments', async (req, res) => {
   try {
     const { id } = req.params;
     const { author, text } = req.body;
+    
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid recipe ID' });
+    }
     
     if (!author || !text) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -407,7 +456,7 @@ app.post('/api/recipes/:id/comments', async (req, res) => {
       return res.status(404).json({ error: 'Recipe not found' });
     }
     
-    res.json({ message: 'Comment added!', commentId: comment._id });
+    res.status(201).json({ message: 'Comment added!', commentId: comment._id });
   } catch (error) {
     console.error('Error adding comment:', error);
     res.status(500).json({ error: 'Failed to add comment' });
@@ -418,6 +467,10 @@ app.post('/api/recipes/:id/comments', async (req, res) => {
 app.delete('/api/recipes/:id/comments/:commentId', async (req, res) => {
   try {
     const { id, commentId } = req.params;
+    
+    if (!ObjectId.isValid(id) || !ObjectId.isValid(commentId)) {
+      return res.status(400).json({ error: 'Invalid recipe or comment ID' });
+    }
     
     const db = client.db('cis486');
     const collection = db.collection('recipes');
@@ -431,14 +484,14 @@ app.delete('/api/recipes/:id/comments/:commentId', async (req, res) => {
       return res.status(404).json({ error: 'Recipe not found' });
     }
     
-    res.json({ message: 'Comment deleted!' });
+    res.status(200).json({ message: 'Comment deleted!' });
   } catch (error) {
     console.error('Error deleting comment:', error);
     res.status(500).json({ error: 'Failed to delete comment' });
   }
 });
 
-//start the server. 
+//start the server. Express server listening on port 3000
 app.listen(3000, () => {
   console.log('Server is running on http://localhost:3000')
 })
