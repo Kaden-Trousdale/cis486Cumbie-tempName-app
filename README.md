@@ -9,7 +9,7 @@ This is a complete CRUD (Create, Read, Update, Delete) application demonstrating
 ## 🚀 Live Deployments
 
 - **Development (Render):** [https://cis486cumbie-tempname-app.onrender.com/](https://cis486cumbie-tempname-app.onrender.com/)
-- **Production (GCP):** https://possiblyediblefoods.barrycumbie.com/
+- **Production:** https://possiblyediblefoods.barrycumbie.com/
 
 ## 💻 Technology Stack
 
