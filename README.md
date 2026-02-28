@@ -1,5 +1,7 @@
 # 🍽️ Seal Chef's Questionable Recipes
 
+## Spring 2026 CIS 486 - Full Stack MVC Deployment & Data Round Trip
+
 A full-stack MVC web application for sharing, rating, and commenting on (questionable) recipes. Built with Node.js, Express, MongoDB, and Bootstrap 5.
 
 ## 🎯 Project Overview
