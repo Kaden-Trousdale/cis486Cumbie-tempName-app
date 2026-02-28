@@ -127,7 +127,22 @@ footer {
 #loadingIndicator {
   padding: 2rem 0;
 }
+/* Like button styling */
+.likeBtn {
+  transition: all 0.2s ease-in-out;
+}
 
+.likeBtn:hover {
+  transform: scale(1.1);
+}
+
+.likeBtn .heart {
+  margin-right: 0.25rem;
+}
+
+.likeCount {
+  font-weight: bold;
+}
 /* Responsive adjustments */
 @media (max-width: 768px) {
   header {

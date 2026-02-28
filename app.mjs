@@ -231,7 +231,206 @@ app.delete('/api/attendance/:id', async (req, res) => {
   }
 });
 
+// ──────────────────────────────────────────────────────────────────────────────
+// CRUD Operations for Recipes
+// ──────────────────────────────────────────────────────────────────────────────
 
+// READ - Get all recipes
+app.get('/api/recipes', async (req, res) => {
+  try {
+    const db = client.db('cis486');
+    const collection = db.collection('recipes');
+    
+    const recipes = await collection.find({}).toArray();
+    res.json(recipes);
+  } catch (error) {
+    console.error('Error reading recipes:', error);
+    res.status(500).json({ error: 'Failed to get recipes' });
+  }
+});
+
+// CREATE - Add new recipe
+app.post('/api/recipes', async (req, res) => {
+  try {
+    const { title, ingredients, instructions } = req.body;
+    
+    if (!title || !ingredients || !instructions) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const db = client.db('cis486');
+    const collection = db.collection('recipes');
+    
+    const recipe = {
+      title,
+      ingredients,
+      instructions,
+      likes: 0,
+      createdAt: new Date()
+    };
+    
+    const result = await collection.insertOne(recipe);
+    res.json({ message: 'Recipe added!', id: result.insertedId });
+  } catch (error) {
+    console.error('Error creating recipe:', error);
+    res.status(500).json({ error: 'Failed to add recipe' });
+  }
+});
+
+// UPDATE - Update recipe
+app.put('/api/recipes/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, ingredients, instructions } = req.body;
+    
+    const db = client.db('cis486');
+    const collection = db.collection('recipes');
+    
+    const result = await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { title, ingredients, instructions, updatedAt: new Date() } }
+    );
+    
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Recipe not found' });
+    }
+    
+    res.json({ message: 'Recipe updated!' });
+  } catch (error) {
+    console.error('Error updating recipe:', error);
+    res.status(500).json({ error: 'Failed to update recipe' });
+  }
+});
+
+// DELETE - Delete recipe
+app.delete('/api/recipes/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const db = client.db('cis486');
+    const collection = db.collection('recipes');
+    
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Recipe not found' });
+    }
+    
+    res.json({ message: 'Recipe deleted!' });
+  } catch (error) {
+    console.error('Error deleting recipe:', error);
+    res.status(500).json({ error: 'Failed to delete recipe' });
+  }
+});
+
+// LIKE - Increment likes for recipe
+app.post('/api/recipes/:id/like', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const db = client.db('cis486');
+    const collection = db.collection('recipes');
+    
+    // Update the likes count
+    const updateResult = await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $inc: { likes: 1 } }
+    );
+    
+    if (updateResult.matchedCount === 0) {
+      return res.status(404).json({ error: 'Recipe not found' });
+    }
+
+    // Fetch the updated recipe to get the new likes count
+    const updatedRecipe = await collection.findOne({ _id: new ObjectId(id) });
+    
+    res.json({ likes: updatedRecipe.likes });
+  } catch (error) {
+    console.error('Error liking recipe:', error);
+    res.status(500).json({ error: 'Failed to like recipe' });
+  }
+});
+
+// GET - Get comments for a recipe
+app.get('/api/recipes/:id/comments', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const db = client.db('cis486');
+    const collection = db.collection('recipes');
+    
+    const recipe = await collection.findOne({ _id: new ObjectId(id) });
+    
+    if (!recipe) {
+      return res.status(404).json({ error: 'Recipe not found' });
+    }
+    
+    res.json(recipe.comments || []);
+  } catch (error) {
+    console.error('Error reading comments:', error);
+    res.status(500).json({ error: 'Failed to get comments' });
+  }
+});
+
+// POST - Add comment to recipe
+app.post('/api/recipes/:id/comments', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { author, text } = req.body;
+    
+    if (!author || !text) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const db = client.db('cis486');
+    const collection = db.collection('recipes');
+    
+    const comment = {
+      _id: new ObjectId(),
+      author,
+      text,
+      createdAt: new Date()
+    };
+    
+    const result = await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $push: { comments: comment } }
+    );
+    
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Recipe not found' });
+    }
+    
+    res.json({ message: 'Comment added!', commentId: comment._id });
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    res.status(500).json({ error: 'Failed to add comment' });
+  }
+});
+
+// DELETE - Delete comment from recipe
+app.delete('/api/recipes/:id/comments/:commentId', async (req, res) => {
+  try {
+    const { id, commentId } = req.params;
+    
+    const db = client.db('cis486');
+    const collection = db.collection('recipes');
+    
+    const result = await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $pull: { comments: { _id: new ObjectId(commentId) } } }
+    );
+    
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Recipe not found' });
+    }
+    
+    res.json({ message: 'Comment deleted!' });
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    res.status(500).json({ error: 'Failed to delete comment' });
+  }
+});
 
 //start the server. 
 app.listen(3000, () => {
