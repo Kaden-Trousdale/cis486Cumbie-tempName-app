@@ -14,7 +14,7 @@ function setLoading(on) {
 }
 
 // ─── READ - Load all recipes from MongoDB ─────────────────────────────────────
-
+// On page load, fetch all recipes and render them to the DOM. Shows loading indicator while fetching.
 function loadRecipes() {
   setLoading(true);
   $.get('/api/recipes')
@@ -30,7 +30,7 @@ function loadRecipes() {
 }
 
 // ─── Render recipes to DOM ────────────────────────────────────────────────────
-
+// Uses Bootstrap cards and includes buttons for edit, delete, like, and toggle comments
 function renderData(recipes) {
   const container = $('#data-container');
   container.empty();
@@ -47,10 +47,11 @@ function renderData(recipes) {
           <h4 class="card-title">${escapeHtml(entry.title)}</h4>
           <p><strong>Ingredients:</strong> ${escapeHtml(entry.ingredients)}</p>
           <p><strong>Instructions:</strong> ${escapeHtml(entry.instructions)}</p>
-          <div class="d-flex gap-2">
+          <div class="d-flex gap-2 align-items-center">
             <button class="btn btn-sm btn-warning editBtn">Edit</button>
             <button class="btn btn-sm btn-danger deleteBtn">Delete</button>
             <button class="btn btn-sm btn-info toggleCommentsBtn">View Comments</button>
+            <button class="btn btn-sm btn-success likeBtn"><span class="heart">♥</span> <span class="likeCount">${entry.likes || 0}</span></button>
           </div>
           
           <!-- Comments Section -->
@@ -74,6 +75,7 @@ function renderData(recipes) {
 }
 
 // Escape HTML to prevent XSS
+// This function replaces special characters with their HTML entity equivalents to prevent malicious scripts from being executed when rendering user-generated content.
 function escapeHtml(text) {
   const map = {
     '&': '&amp;',
@@ -86,7 +88,8 @@ function escapeHtml(text) {
 }
 
 // ─── Load and display comments for a recipe ───────────────────────────────────
-
+// When the "View Comments" button is clicked, this function fetches the comments for the specific recipe and renders them in the comments section. It also handles the case where there are no comments and displays an appropriate message.
+// Optional but I wanted to add comments and things to see if they could work.
 function loadComments(recipeId, container) {
   $.get(`/api/recipes/${recipeId}/comments`)
     .done((comments) => {
@@ -118,7 +121,7 @@ function loadComments(recipeId, container) {
 }
 
 // ─── CREATE - POST new recipe ─────────────────────────────────────────────────
-
+// When the form is submitted, this function gathers the input values, sends a POST request to create a new recipe, and then reloads the recipes to show the new entry. It also includes error handling to display a message if the request fails.
 $('#dataForm').on('submit', function (e) {
   e.preventDefault();
   const form = this;
@@ -149,7 +152,7 @@ $('#dataForm').on('submit', function (e) {
 });
 
 // ─── DELETE - Remove recipe ───────────────────────────────────────────────────
-
+// When the "Delete" button is clicked, this function confirms the action with the user, sends a DELETE request to remove the recipe, and then reloads the recipes to reflect the change. It also includes error handling to display a message if the request fails.
 $('#data-container').on('click', '.deleteBtn', function () {
   const id = $(this).closest('.card').data('id');
   if (!confirm('Are you sure you want to delete this recipe?')) return;
@@ -162,7 +165,27 @@ $('#data-container').on('click', '.deleteBtn', function () {
     .fail(() => showStatus('Failed to delete recipe.', 'danger'));
 });
 
+// ─── LIKE - Increment likes for recipe ────────────────────────────────────────
+// When the "Like" button is clicked, this function sends a POST request to increment the like count for the specific recipe and updates the like count displayed on the button. It also includes error handling to display a message if the request fails.
+// Very Very optional, but whatever.
+$('#data-container').on('click', '.likeBtn', function () {
+  const id = $(this).closest('.card').data('id');
+  const likeCountSpan = $(this).find('.likeCount');
+
+  $.ajax({
+    url: `/api/recipes/${id}/like`,
+    method: 'POST',
+    contentType: 'application/json',
+  })
+    .done((res) => {
+      likeCountSpan.text(res.likes);
+      showStatus('Recipe liked!');
+    })
+    .fail(() => showStatus('Failed to like recipe.', 'danger'));
+});
+
 // ─── EDIT - Open modal with current values ────────────────────────────────────
+// When the "Edit" button is clicked, this function retrieves the current recipe details from the card, populates the edit form in a modal with those details, and then shows the modal to the user. This allows the user to see the existing values and make changes before saving.
 
 $('#data-container').on('click', '.editBtn', function () {
   const card = $(this).closest('.card');
@@ -181,6 +204,7 @@ $('#data-container').on('click', '.editBtn', function () {
 });
 
 // ─── UPDATE - PUT updated recipe ──────────────────────────────────────────────
+// When the "Save Changes" button in the edit modal is clicked, this function gathers the updated values from the form, sends a PUT request to update the recipe in the database, and then reloads the recipes to reflect the changes. It also includes error handling to display a message if the request fails.
 
 $('#saveEditBtn').on('click', function () {
   const id = $('#editId').val();
@@ -205,6 +229,7 @@ $('#saveEditBtn').on('click', function () {
 });
 
 // ─── Comments - Toggle comments section ───────────────────────────────────────
+// When the "View Comments" button is clicked, this function toggles the visibility of the comments section for that recipe. If the comments section is being shown, it also calls the function to load and display the comments for that recipe.
 
 $('#data-container').on('click', '.toggleCommentsBtn', function () {
   const card = $(this).closest('.card');
@@ -220,6 +245,7 @@ $('#data-container').on('click', '.toggleCommentsBtn', function () {
 });
 
 // ─── Comments - Add new comment ────────────────────────────────────────────────
+// When the "Post Comment" button is clicked, this function gathers the author and text from the input fields, sends a POST request to add the comment to the database, and then reloads the comments to show the new comment. It also includes error handling to display a message if the request fails.
 
 $('#data-container').on('click', '.addCommentBtn', function () {
   const card = $(this).closest('.card');
@@ -247,7 +273,8 @@ $('#data-container').on('click', '.addCommentBtn', function () {
     .fail(() => showStatus('Failed to add comment.', 'danger'));
 });
 
-// ─── Comments - Delete comment ─────────────────────────────────────────────────
+// ─── Comments - Delete comment ─────────────────────────────────────────────────'
+// When the "Delete" button next to a comment is clicked, this function confirms the action with the user, sends a DELETE request to remove the comment from the database, and then reloads the comments to reflect the change. It also includes error handling to display a message if the request fails.
 
 $('#data-container').on('click', '.deleteCommentBtn', function () {
   const commentId = $(this).data('comment-id');
@@ -267,13 +294,8 @@ $('#data-container').on('click', '.deleteCommentBtn', function () {
     .fail(() => showStatus('Failed to delete comment.', 'danger'));
 });
 
-// ─── Sample Data Loader ───────────────────────────────────────────────────────
 
-$('#loadSample').on('click', () => {
-  $('#entryTitle').val('Space Pancakes');
-  $('#entryIngredients').val('Interstellar flour, Martian syrup');
-  $('#entryInstructions').val('Mix, pour onto hover-pan, flip with anti-grav spatula, enjoy!');
-});
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
+
 $(document).ready(() => loadRecipes());
